@@ -28,6 +28,9 @@ dofile(minetest.get_modpath("death_messages").."/settings.txt")
 -- default message used when RANDOM_MESSAGES is disabled.
 local messages = {}
 
+-- create a table of players and their death count
+local death_count = {}
+
 -- Lava death messages
 messages.lava = {
     " melted into a ball of fire.",
@@ -79,6 +82,26 @@ minetest.register_on_dieplayer(function(player)
     local node = minetest.registered_nodes[
         minetest.get_node(player:getpos()).name
     ]
+	-- check if player is in deathcount table and add if not add them
+	if death_count[player_name] == nil then
+		death_count[player_name] = 1
+	else
+		death_count[player_name] = death_count[player_name] + 1
+	end
+
+	-- check if PCRS_deaths.json exists and if not create it
+	local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "r")
+	if file == nil then
+		file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
+		file:write(minetest.write_json(death_count))
+		file:close()
+	end
+
+	-- update the json file PCRS_deaths.json with the death_count table
+	local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
+	file:write(minetest.write_json(death_count))
+	file:close()
+
     if minetest.is_singleplayer() then
         player_name = "You"
     end
