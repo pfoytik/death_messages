@@ -97,11 +97,6 @@ minetest.register_on_dieplayer(function(player)
 		file:close()
 	end
 
-	-- update the json file PCRS_deaths.json with the death_count table
-	local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
-	file:write(minetest.write_json(death_count))
-	file:close()
-
     if minetest.is_singleplayer() then
         player_name = "You"
     end
@@ -114,10 +109,21 @@ minetest.register_on_dieplayer(function(player)
     -- Death by fire
     elseif node.name == "fire:basic_flame" then
         minetest.chat_send_all(player_name .. get_message("fire"))
+	-- Death by falling
+	elseif node.name == "air" then
+		minetest.chat_send_all(player_name .. " fell to their death.")
+	-- Death by node with animalworld in name
+	elseif string.find(node.name, "animalworld") then
+		minetest.chat_send_all(player_name .. " was killed by an animal.")
     -- Death by something else
     else
         minetest.chat_send_all(player_name .. get_message("other"))
     end
+
+	-- update the json file PCRS_deaths.json with the death_count table and the last death message
+	file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
+	file:write(minetest.write_json(death_count))
+	file:close()
 
 end)
 
