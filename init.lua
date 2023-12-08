@@ -31,6 +31,13 @@ local messages = {}
 -- create a table of players and their death count
 local death_count = {}
 
+-- read death_count from json if PCRS_deaths.json exists
+local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "r")
+if file ~= nil then
+	death_count = minetest.parse_json(file:read("*all"))
+	file:close()
+end
+
 -- Lava death messages
 messages.lava = {
     " melted into a ball of fire.",
