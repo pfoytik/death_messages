@@ -31,8 +31,11 @@ local messages = {}
 -- create a table of players and their death count
 local death_count = {}
 
+-- set the PCRS_deaths.json file path to be in the death_messages mod folder
+local file_path = minetest.get_modpath("death_messages").."/scoreboard/PCRS_deaths.json"
+
 -- read death_count from json if PCRS_deaths.json exists
-local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "r")
+local file = io.open(file_path, "r")
 if file ~= nil then
 	death_count = minetest.parse_json(file:read("*all"))
 	file:close()
@@ -89,6 +92,7 @@ minetest.register_on_dieplayer(function(player)
     local node = minetest.registered_nodes[
         minetest.get_node(player:getpos()).name
     ]
+
 	-- check if player is in deathcount table and add if not add them
 	if death_count[player_name] == nil then
 		death_count[player_name] = 1
@@ -97,9 +101,9 @@ minetest.register_on_dieplayer(function(player)
 	end
 
 	-- check if PCRS_deaths.json exists and if not create it
-	local file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "r")
+	local file = io.open(file_path, "r")
 	if file == nil then
-		file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
+		file = io.open(file_path, "w")
 		file:write(minetest.write_json(death_count))
 		file:close()
 	end
@@ -119,8 +123,8 @@ minetest.register_on_dieplayer(function(player)
 	-- Death by falling
 	elseif node.name == "air" then
 		minetest.chat_send_all(player_name .. " fell to their death.")
-	-- Death by node with animalworld in name
-	elseif string.find(node.name, "animalworld") then
+	-- Death by node with animal in name
+	elseif string.find(node.name, "animal") then
 		minetest.chat_send_all(player_name .. " was killed by an animal.")
     -- Death by something else
     else
@@ -128,7 +132,7 @@ minetest.register_on_dieplayer(function(player)
     end
 
 	-- update the json file PCRS_deaths.json with the death_count table and the last death message
-	file = io.open(minetest.get_worldpath().."/PCRS_deaths.json", "w")
+	file = io.open(file_path, "w")
 	file:write(minetest.write_json(death_count))
 	file:close()
 

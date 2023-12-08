@@ -1,0 +1,15 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.scoreboard {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.player {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
