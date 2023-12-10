@@ -32,7 +32,7 @@ local messages = {}
 local death_count = {}
 
 -- set the PCRS_deaths.json file path to be in the death_messages mod folder
-local file_path = minetest.get_modpath("death_messages").."/scoreboard/PCRS_deaths.json"
+local file_path = minetest.get_modpath("death_messages").."/scoreboard/PCRS_deaths.sqlite"
 
 -- read death_count from json if PCRS_deaths.json exists
 local file = io.open(file_path, "r")
@@ -87,6 +87,32 @@ function get_message(mtype)
     end
 end
 
+-- periodically run to save death_count to json
+local function save_deaths()
+	-- check if PCRS_deaths.json exists and if not create it
+	local file = io.open(file_path, "r")
+	if file == nil then
+		file = io.open(file_path, "w")
+		file:write(minetest.write_json(death_count))
+		file:close()
+	end
+
+	-- update the json file PCRS_deaths.json with the death_count table and the last death message
+	file = io.open(file_path, "w")
+	file:write(minetest.write_json(death_count))
+	file:close()
+end
+
+-- save death_count to json every 5 minutes
+minetest.register_globalstep(function(dtime)
+	local timer = 0
+	timer = timer + dtime
+	if timer >= 300 then
+		save_deaths()
+		timer = 0
+	end
+end)
+
 minetest.register_on_dieplayer(function(player)
     local player_name = player:get_player_name()
     local node = minetest.registered_nodes[
@@ -98,14 +124,6 @@ minetest.register_on_dieplayer(function(player)
 		death_count[player_name] = 1
 	else
 		death_count[player_name] = death_count[player_name] + 1
-	end
-
-	-- check if PCRS_deaths.json exists and if not create it
-	local file = io.open(file_path, "r")
-	if file == nil then
-		file = io.open(file_path, "w")
-		file:write(minetest.write_json(death_count))
-		file:close()
 	end
 
     if minetest.is_singleplayer() then
@@ -130,11 +148,6 @@ minetest.register_on_dieplayer(function(player)
     else
         minetest.chat_send_all(player_name .. get_message("other"))
     end
-
-	-- update the json file PCRS_deaths.json with the death_count table and the last death message
-	file = io.open(file_path, "w")
-	file:write(minetest.write_json(death_count))
-	file:close()
 
 end)
 
